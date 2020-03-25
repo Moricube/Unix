@@ -45,11 +45,14 @@ tempPathFile=$tempPathFile/$fileName
 
 echo tempPathFile: $tempPathFile
 
-g++ -o $fileName.exe $tempPathFile
+g++ -o $tempPath/$fileName.exe $tempPathFile
+
+gResult=$?
+
+cp $tempPath/$fileName.exe $PWD
 
 rm -d -Rf $tempPath
 
 echo Temp directory by path $tempPath was removed
 
-
-
+echo g++ еxit code: $gResult

@@ -1,66 +1,50 @@
+#include <iostream>
 #include <unistd.h>
 #include <queue>
-#include <stdlib.h>
-#include <stdio.h>
-#include <errno.h>
-#include <pthread.h>
+#include <condition_variable>
+#include <mutex>
+#include <thread>
 
 using namespace std;
 
+int count = 0;
 queue<int> q;
 
-pthread_mutex_t mutex;
-pthread_t threadReducer;
-pthread_t threadConsumer;  
+mutex mtx;
+condition_variable conditionVariable;
 
-void * threadReducerFunc(void *arg) {
-    int count = 0;
+void consumerFunc(){
+    unique_lock<mutex> lck(mtx);
+    conditionVariable.wait(lck);
 
-    while (true) {
-        pthread_mutex_lock(&mutex);
+    int signal = q.front();
+    q.pop();
 
-        q.push(count);
-
-        printf("Поток отправил в очередь сигнал: %i\n", count);
-
-        count++;
-
-        pthread_mutex_unlock(&mutex);
-
-        sleep(1);
-    }
+    cout << "Consumer получил из очереди сигнал: " << signal << endl;
 }
 
-void * threadConsumerFunc(void *arg) {
-    while (true) {
-        pthread_mutex_lock(&mutex);
+void reducerFunc() {
+    cout << "Reducer отправил в очередь сигнал: " << count << endl;
 
-        if (!q.empty()) {
-            int signal = q.front();
+    q.push(count);
 
-            q.pop();
+    count++;
 
-            printf("Поток получил из очереди сигнал: %i\n", signal);
-        }   
+    conditionVariable.notify_one();
 
-        pthread_mutex_unlock(&mutex);     
-    }
+    sleep(1);
 }
 
-int main() 
-{
-    int threadRedicerId = 1;
-    int threadConsumerId = 2;  
-    
-    pthread_mutex_init(&mutex, NULL);
+int main(){
+    while (true)
+    {
+        thread consumerThread(consumerFunc);
+        thread reducerThread(reducerFunc);
 
-    pthread_create(&threadReducer, NULL, threadReducerFunc, &threadRedicerId);
-    pthread_create(&threadConsumer, NULL, threadConsumerFunc, &threadConsumerId);
+        consumerThread.join();
+        reducerThread.join(); 
+    }
 
-    pthread_join(threadReducer, NULL);
-    pthread_join(threadConsumerId, NULL);
 
-    pthread_mutex_destroy(&mutex);
 
-    return EXIT_SUCCESS;
 }

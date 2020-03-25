@@ -1,5 +1,10 @@
 {
     "files.associations": {
-        "ostream": "cpp"
+        "ostream": "cpp",
+        "condition_variable": "cpp",
+        "mutex": "cpp",
+        "iostream": "cpp",
+        "new": "cpp",
+        "type_traits": "cpp"
     }
 }
