@@ -38,6 +38,10 @@ int main(int count, char *strings[]) {
     }
 
 	// Send message
+	// if (sendto(sd, msg, sizeof(msg), 0, &addr, sizeof(addr)) < 0) {
+	// 	PANIC("sendto");
+    // }
+
 	if (sendto(sd, msg, sizeof(msg), 0, &addr, sizeof(addr)) < 0) {
 		PANIC("sendto");
     }
